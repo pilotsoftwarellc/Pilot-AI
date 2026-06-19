@@ -17,7 +17,17 @@ from pilot_lm.chat_corpus import chat_texts
 from pilot_lm.text_cleaning import clean_training_text
 
 
-def iter_jsonl_text(path: Path, max_bytes: int | None) -> Iterable[str]:
+def iter_text_chunks(text: str, max_chars: int) -> Iterable[str]:
+    if len(text) <= max_chars:
+        yield text
+        return
+    for start in range(0, len(text), max_chars):
+        chunk = text[start : start + max_chars].strip()
+        if len(chunk) >= 80:
+            yield chunk
+
+
+def iter_jsonl_text(path: Path, max_bytes: int | None, max_doc_chars: int) -> Iterable[str]:
     consumed = 0
     with path.open("rb") as f:
         for raw_line in f:
@@ -33,7 +43,7 @@ def iter_jsonl_text(path: Path, max_bytes: int | None) -> Iterable[str]:
                 continue
             text = clean_training_text(text)
             if len(text) >= 80:
-                yield text
+                yield from iter_text_chunks(text, max_doc_chars)
 
 
 def write_tokens(f, tokens: list[int]) -> int:
@@ -52,6 +62,7 @@ def main() -> None:
     parser.add_argument("--chat-repeats", type=int, default=20_000)
     parser.add_argument("--val-every", type=int, default=200)
     parser.add_argument("--max-val-tokens", type=int, default=2_000_000)
+    parser.add_argument("--max-doc-chars", type=int, default=12_000)
     parser.add_argument("--seed", type=int, default=1337)
     args = parser.parse_args()
 
@@ -84,7 +95,7 @@ def main() -> None:
             stats["train_tokens"] += write_tokens(train_f, tokens)
 
         for lang, path_str in (("en", args.english), ("es", args.spanish)):
-            for text in iter_jsonl_text(Path(path_str), max_bytes):
+            for text in iter_jsonl_text(Path(path_str), max_bytes, args.max_doc_chars):
                 stats["documents"] += 1
                 wrapped = f"Texto ({lang}):\n{text}{tokenizer.eos_token}\n"
                 tokens = tokenizer.encode(wrapped, add_special_tokens=False)
