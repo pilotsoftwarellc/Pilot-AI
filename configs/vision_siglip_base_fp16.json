@@ -1,0 +1,11 @@
+{
+  "vision_model_name": "google/siglip-base-patch16-224",
+  "local_dir": "models/vision/siglip-base-patch16-224-fp16",
+  "dtype": "float16",
+  "device": "cpu",
+  "freeze_vision": true,
+  "pilot_embedding_dim": 768,
+  "n_visual_tokens": 8,
+  "adapter_type": "mlp",
+  "notes": "SigLIP Base vision encoder for Pilot Vision 1.0. Download/convert after text training is paused or complete."
+}
