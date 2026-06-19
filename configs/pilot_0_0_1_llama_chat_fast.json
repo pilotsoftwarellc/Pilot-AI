@@ -1,8 +1,8 @@
 {
-  "run_name": "pilot_1_1_llama_chat_fast",
-  "out_dir": "runs/pilot_1_1_llama_chat_fast",
-  "data_dir": "data/pilot_1_1_tokens_chatmix",
-  "tokenizer_dir": "tokenizers/pilot_1_1_gpt2_chat",
+  "run_name": "pilot_0_0_1_llama_chat_fast",
+  "out_dir": "runs/pilot_0_0_1_llama_chat_fast",
+  "data_dir": "data/pilot_0_0_1_tokens_chatmix",
+  "tokenizer_dir": "tokenizers/pilot_0_0_1_gpt2_chat",
   "seed": 1337,
   "device": "cuda",
   "dtype": "float16",
@@ -54,6 +54,6 @@
   "save_interval": 500,
   "numbered_save_interval": 2000,
   "sample_interval": 500,
-  "sample_prompt": "Sistema: Eres Pilot 1.1, un asistente bilingue de IA. Responde claro, util y directo.\nUsuario: hola\nPilot:",
+  "sample_prompt": "Sistema: Eres Pilot 0.0.1, un asistente bilingue de IA. Responde claro, util y directo.\nUsuario: hola\nPilot:",
   "sample_tokens": 160
 }

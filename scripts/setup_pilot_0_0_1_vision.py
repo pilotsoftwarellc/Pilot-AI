@@ -10,7 +10,7 @@ from transformers import AutoModel, AutoProcessor
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="configs/pilot_1_1_vision_siglip.json")
+    parser.add_argument("--config", default="configs/pilot_0_0_1_vision_siglip.json")
     args = parser.parse_args()
 
     cfg = json.loads(Path(args.config).read_text(encoding="utf-8"))
@@ -29,7 +29,7 @@ def main() -> None:
 
     processor.save_pretrained(out_dir)
     model.save_pretrained(out_dir, safe_serialization=True)
-    (out_dir / "pilot_1_1_vision_config.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    (out_dir / "pilot_0_0_1_vision_config.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
     print(f"saved vision encoder to {out_dir}")
     print("next stage after text chat works: train the projector/mmproj on image-caption/chat data")
 

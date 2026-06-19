@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from pilot_lm.text_cleaning import clean_training_text
 
 
-SYSTEM_PROMPT = "Eres Pilot 1.1, un asistente bilingue de IA. Responde claro, util y directo."
+SYSTEM_PROMPT = "Eres Pilot 0.0.1, un asistente bilingue de IA. Responde claro, util y directo."
 
 
 def format_chat(user: str, assistant: str, system: str = SYSTEM_PROMPT) -> str:
@@ -30,8 +30,8 @@ def seed_chats() -> list[str]:
         ("hey pilot", "Aquí estoy. Dime qué necesitas."),
         ("hello", "Hello. How can I help?"),
         ("hi", "Hi. What would you like to work on?"),
-        ("quien eres?", "Soy Pilot 1.1, un asistente de IA bilingue entrenado para ayudar en español e ingles."),
-        ("who are you?", "I am Pilot 1.1, a bilingual AI assistant for Spanish and English."),
+        ("quien eres?", "Soy Pilot 0.0.1, un asistente de IA bilingue entrenado para ayudar en español e ingles."),
+        ("who are you?", "I am Pilot 0.0.1, a bilingual AI assistant for Spanish and English."),
     ]
     tasks = [
         ("explicame que es una gpu", "Una GPU es un procesador diseñado para hacer muchos calculos en paralelo. Sirve para graficos, IA y tareas numericas pesadas."),
@@ -61,8 +61,8 @@ def seed_chats() -> list[str]:
         ("hey pilot", "Aqui estoy. Dime que necesitas."),
         ("hello", "Hello. How can I help?"),
         ("hi", "Hi. What would you like to work on?"),
-        ("quien eres?", "Soy Pilot 1.1, un asistente de IA bilingue entrenado para ayudar en espanol e ingles."),
-        ("who are you?", "I am Pilot 1.1, a bilingual AI assistant for Spanish and English."),
+        ("quien eres?", "Soy Pilot 0.0.1, un asistente de IA bilingue entrenado para ayudar en espanol e ingles."),
+        ("who are you?", "I am Pilot 0.0.1, a bilingual AI assistant for Spanish and English."),
         ("como estas?", "Estoy listo para ayudarte. Que hacemos?"),
         ("gracias", "De nada. Aqui estoy si necesitas algo mas."),
         ("thank you", "You're welcome. I am here if you need anything else."),
@@ -122,8 +122,8 @@ def write_tokens(f, tokens: list[int]) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tokenizer-dir", default="tokenizers/pilot_1_1_gpt2_chat")
-    parser.add_argument("--out-dir", default="data/pilot_1_1_tokens_fast")
+    parser.add_argument("--tokenizer-dir", default="tokenizers/pilot_0_0_1_gpt2_chat")
+    parser.add_argument("--out-dir", default="data/pilot_0_0_1_tokens_fast")
     parser.add_argument("--english", default="data/raw/en_fineweb_edu.jsonl")
     parser.add_argument("--spanish", default="data/raw/es_fineweb2_spa_latn.jsonl")
     parser.add_argument("--max-gb-per-language", type=float, default=2.0)

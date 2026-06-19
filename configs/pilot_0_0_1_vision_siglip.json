@@ -4,10 +4,10 @@
   "dtype": "float16",
   "device": "cpu",
   "freeze_vision": true,
-  "text_model_run": "runs/pilot_1_1_llama_chat_fast",
-  "adapter_out_dir": "runs/pilot_1_1_vision_adapter",
+  "text_model_run": "runs/pilot_0_0_1_llama_chat_fast",
+  "adapter_out_dir": "runs/pilot_0_0_1_vision_adapter",
   "pilot_embedding_dim": 512,
   "n_visual_tokens": 16,
   "adapter_type": "mlp",
-  "notes": "Stage 2 vision plan: freeze SigLIP, train a projector into Pilot 1.1 after text/chat checkpoint is usable."
+  "notes": "Stage 2 vision plan: freeze SigLIP, train a projector into Pilot 0.0.1 after text/chat checkpoint is usable."
 }
