@@ -15,7 +15,7 @@ from transformers import AutoTokenizer, LlamaConfig, LlamaForCausalLM
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from pilot_lm.data import TokenBatcher
-from train import (
+from pilot_lm.training_utils import (
     format_duration,
     get_lr,
     maybe_adjust_power_limit,

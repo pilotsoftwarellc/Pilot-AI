@@ -32,6 +32,7 @@ pip install -r requirements.txt
 Set up the tokenizer and prepare the balanced chat/text dataset:
 
 ```powershell
+.\start_pilot_1_1_download_visible.cmd
 .\start_pilot_1_1_setup_visible.cmd
 ```
 
@@ -82,12 +83,6 @@ The vision stage downloads a SigLIP encoder in fp16:
 This prepares the vision encoder only. To make Pilot accept images in a chat UI,
 the next stage is training a projector/mmproj-style adapter on image-caption or
 image-chat data and exporting it in a format supported by the target runtime.
-
-## Legacy Pilot 1.0
-
-The repository still includes the earlier byte-level GPT training scripts. Those
-were useful for experimentation, but Pilot 1.1 is the preferred path for
-runtime compatibility because it exports as a Llama-compatible GGUF model.
 
 ## Project Layout
 
