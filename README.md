@@ -32,25 +32,30 @@ pip install -r requirements.txt
 Set up the tokenizer and prepare the balanced chat/text dataset:
 
 ```powershell
-.\start_pilot_1_1_download_visible.cmd
-.\start_pilot_1_1_setup_visible.cmd
+python scripts\download_bilingual_corpus.py --en-gb 1 --es-gb 1 --out-dir data\raw --overwrite
+python scripts\setup_pilot11_tokenizer.py
+python scripts\prepare_pilot11_llama_data.py --out-dir data\pilot_1_1_tokens_chatmix --max-gb-per-language 0.35 --chat-repeats 500000 --max-val-tokens 1000000
 ```
 
-Train Pilot 1.1 in a visible CMD window:
+Train Pilot 1.1:
 
 ```powershell
-.\start_pilot_1_1_train_visible.cmd
+python scripts\train_pilot11_llama.py --config configs\pilot_1_1_llama_chat_fast.json
 ```
 
 The trainer prints loss, tokens per second, average tokens per second, GPU
-temperature, progress, tokens trained, elapsed time, and ETA. If a checkpoint
-already exists at `runs\pilot_1_1_llama_chat_fast\hf_last`, the launcher resumes
-from it automatically.
+temperature, progress, tokens trained, elapsed time, and ETA.
+
+Resume from the latest checkpoint:
+
+```powershell
+python scripts\train_pilot11_llama.py --config configs\pilot_1_1_llama_chat_fast.json --resume runs\pilot_1_1_llama_chat_fast\hf_last
+```
 
 Export the latest checkpoint to GGUF:
 
 ```powershell
-.\start_pilot_1_1_export_visible.cmd
+python scripts\export_pilot11_gguf.py --hf-dir runs\pilot_1_1_llama_chat_fast\hf_last --outfile exports\pilot_1_1-llama-chat-q8_0.gguf --outtype q8_0 --write-modelfile
 ```
 
 The default output is:
@@ -77,7 +82,7 @@ assistant without more supervised chat data and additional tuning.
 The vision stage downloads a SigLIP encoder in fp16:
 
 ```powershell
-.\start_pilot_1_1_vision_setup_visible.cmd
+python scripts\setup_pilot11_vision.py --config configs\pilot_1_1_vision_siglip.json
 ```
 
 This prepares the vision encoder only. To make Pilot accept images in a chat UI,
@@ -90,7 +95,6 @@ image-chat data and exporting it in a format supported by the target runtime.
 configs/      Training and vision configs
 pilot_lm/     Shared Python helpers
 scripts/      Data preparation, training, export, and setup scripts
-*.cmd         Windows launchers for visible training/setup/export
 ```
 
 Ignored local folders:
