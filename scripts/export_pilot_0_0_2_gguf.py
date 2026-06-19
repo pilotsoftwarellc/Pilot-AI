@@ -5,15 +5,15 @@ import subprocess
 from pathlib import Path
 
 
-OLLAMA_TEMPLATE = '''FROM ./pilot_0_0_1-llama-chat-q8_0.gguf
+OLLAMA_TEMPLATE = '''FROM ./pilot_0_0_2-llama-chat-q8_0.gguf
 
 PARAMETER num_ctx 4096
-PARAMETER temperature 0.8
-PARAMETER top_p 0.95
-PARAMETER repeat_penalty 1.08
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.1
 PARAMETER stop "<|endoftext|>"
 
-TEMPLATE """Sistema: Eres Pilot 0.0.1, un asistente bilingue de IA. Responde claro, util y directo.
+TEMPLATE """Sistema: Eres Pilot 0.0.2, un asistente bilingue de IA. Responde claro, util y directo.
 {{ if .Prompt }}Usuario: {{ .Prompt }}
 {{ end }}Pilot:"""
 '''
@@ -21,8 +21,8 @@ TEMPLATE """Sistema: Eres Pilot 0.0.1, un asistente bilingue de IA. Responde cla
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hf-dir", default="runs/pilot_0_0_1_llama_chat_fast/hf_last")
-    parser.add_argument("--outfile", default="exports/pilot_0_0_1-llama-chat-q8_0.gguf")
+    parser.add_argument("--hf-dir", default="runs/pilot_0_0_2_sft/hf_last")
+    parser.add_argument("--outfile", default="exports/pilot_0_0_2-llama-chat-q8_0.gguf")
     parser.add_argument("--outtype", default="q8_0", choices=["f16", "q8_0"])
     parser.add_argument("--write-modelfile", action="store_true")
     args = parser.parse_args()
@@ -46,7 +46,7 @@ def main() -> None:
     print(f"wrote {outfile}")
 
     if args.write_modelfile:
-        modelfile = outfile.parent / "Modelfile.pilot-0.0.1"
+        modelfile = outfile.parent / "Modelfile.pilot-0.0.2"
         modelfile.write_text(OLLAMA_TEMPLATE, encoding="utf-8")
         print(f"wrote {modelfile}")
 

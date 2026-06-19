@@ -14,7 +14,7 @@ from transformers import AutoTokenizer, LlamaConfig, LlamaForCausalLM
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pilot_lm.data import TokenBatcher
+from pilot_lm.data import SupervisedTokenBatcher, TokenBatcher
 from pilot_lm.training_utils import (
     format_duration,
     get_lr,
@@ -43,10 +43,10 @@ def build_model_config(cfg: dict, tokenizer) -> LlamaConfig:
         rms_norm_eps=cfg["rms_norm_eps"],
         rope_theta=cfg["rope_theta"],
         attention_bias=cfg.get("attention_bias", False),
-        tie_word_embeddings=cfg.get("tie_word_embeddings", False),
+        tie_word_embeddings=cfg.get("tie_word_embeddings", True),
         bos_token_id=tokenizer.eos_token_id,
         eos_token_id=tokenizer.eos_token_id,
-        pad_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id,
         use_cache=False,
         architectures=["LlamaForCausalLM"],
     )
@@ -68,6 +68,15 @@ def configure_optimizer(model: torch.nn.Module, cfg: dict, device_type: str) -> 
         eps=1e-8,
         fused=fused,
     )
+
+
+def build_batcher(cfg: dict, device: str):
+    dataset_type = cfg.get("dataset_type", "pretrain")
+    if dataset_type == "sft":
+        return SupervisedTokenBatcher(cfg["data_dir"], cfg["block_size"], cfg["batch_size"], device)
+    if dataset_type == "pretrain":
+        return TokenBatcher(cfg["data_dir"], cfg["block_size"], cfg["batch_size"], device)
+    raise ValueError(f"unknown dataset_type: {dataset_type}")
 
 
 @torch.no_grad()
@@ -95,10 +104,10 @@ def sample_text(model, tokenizer, prompt: str, device: str, max_tokens: int) -> 
         input_ids=input_ids,
         max_new_tokens=max_tokens,
         do_sample=True,
-        temperature=0.8,
-        top_p=0.95,
-        repetition_penalty=1.08,
-        pad_token_id=tokenizer.eos_token_id,
+        temperature=0.7,
+        top_p=0.9,
+        repetition_penalty=1.1,
+        pad_token_id=tokenizer.pad_token_id,
         eos_token_id=tokenizer.eos_token_id,
     )
     model.train()
@@ -151,15 +160,18 @@ def main() -> None:
     ctx = nullcontext() if device_type == "cpu" or dtype_name == "float32" else torch.autocast(device_type, dtype=ptdtype)
 
     tokenizer = AutoTokenizer.from_pretrained(cfg["tokenizer_dir"])
-    tokenizer.pad_token = tokenizer.eos_token
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
+    trainer_state = {}
     if args.resume:
         model = LlamaForCausalLM.from_pretrained(args.resume, torch_dtype=torch.float32)
         state_path = Path(args.resume) / "trainer_state.pt"
         trainer_state = torch.load(state_path, map_location="cpu", weights_only=False) if state_path.exists() else {}
+    elif cfg.get("init_from"):
+        model = LlamaForCausalLM.from_pretrained(cfg["init_from"], torch_dtype=torch.float32)
     else:
         model = LlamaForCausalLM(build_model_config(cfg, tokenizer))
-        trainer_state = {}
 
     model.config.use_cache = False
     if cfg.get("gradient_checkpointing", False):
@@ -174,7 +186,7 @@ def main() -> None:
         optimizer.load_state_dict(trainer_state["optimizer"])
 
     scaler = torch.amp.GradScaler(device_type, enabled=(device_type == "cuda" and dtype_name == "float16"))
-    batcher = TokenBatcher(cfg["data_dir"], cfg["block_size"], cfg["batch_size"], device)
+    batcher = build_batcher(cfg, device)
 
     step = int(trainer_state.get("step", 0))
     best_val = float(trainer_state.get("best_val_loss", "inf"))
@@ -182,6 +194,7 @@ def main() -> None:
     tokens_per_iter = cfg["batch_size"] * grad_accum * cfg["block_size"]
     total_tokens = cfg["max_iters"] * tokens_per_iter
     print(f"run: {cfg['run_name']}", flush=True)
+    print(f"dataset_type: {cfg.get('dataset_type', 'pretrain')}", flush=True)
     print(f"device: {device} | dtype: {dtype_name}", flush=True)
     print(f"parameters: {model.num_parameters() / 1e6:.2f}M", flush=True)
     print(f"tokens/iter: {tokens_per_iter:,}", flush=True)
